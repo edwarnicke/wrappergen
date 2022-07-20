@@ -22,7 +22,7 @@ jobs:
     runs-on: ${{ matrix.os }}
     strategy:
       matrix:
-        os: [ ubuntu-latest ]
+        os: [ubuntu-latest]
     steps:
       - uses: actions/setup-go@v3
         with:
