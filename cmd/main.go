@@ -18,13 +18,11 @@ package main
 
 import (
 	_ "embed"
-	"fmt"
-	"html/template"
+	"io/ioutil"
 	"log"
-	"os"
 )
 
-//go:embed _templates/main.go.impl
+//go:embed _templates/main.go
 var mainGo string
 
 // TemplateInput - Configuration for imports-gen
@@ -34,31 +32,10 @@ type TemplateInput struct {
 }
 
 func main() {
-
 	filename := "main.go"
-	if err := os.Remove(filename); err != nil && !os.IsNotExist(err) {
-		log.Fatalf("unable to remove %s because %+v", filename, err)
-	}
+	err := ioutil.WriteFile(filename, []byte(mainGo), 0700)
 
-	// Load input information from environment
-	// go generate passes a number of envs we will pick up this way
-	input := &TemplateInput{}
-	input.Package = os.Getenv("GOPACKAGE")
-
-	if input.Package == "" {
-		log.Fatal("error did not find GOPACKAGE env")
-	}
-
-	// Create the template
-	tmpl := template.Must(template.New(filename).Parse(mainGo))
-
-	// Create the main.go file
-	f, err := os.Create(filename)
 	if err != nil {
-		log.Fatalf("error creating file: %q: %+v", filename, err)
-	}
-	defer func() { _ = f.Close() }()
-	if err := tmpl.Execute(f, input); err != nil {
-		fmt.Fprintf(os.Stderr, "error processing template: %+v", err)
+		log.Fatalf("unable to write to filename %s because %+v", filename, err)
 	}
 }
