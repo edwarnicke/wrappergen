@@ -18,18 +18,47 @@ package main
 
 import (
 	_ "embed"
-	"io/ioutil"
-
-	"github.com/sirupsen/logrus"
+	"fmt"
+	"html/template"
+	"log"
+	"os"
 )
 
-//go:embed _templates/main.go
+//go:embed _templates/main.go.impl
 var mainGo string
 
+// TemplateInput - Configuration for imports-gen
+type TemplateInput struct {
+	// Package - package for generated imports.go
+	Package string
+}
+
 func main() {
+
 	filename := "main.go"
-	err := ioutil.WriteFile(filename, []byte(mainGo), 0700)
+	if err := os.Remove(filename); err != nil && !os.IsNotExist(err) {
+		log.Fatalf("unable to remove %s because %+v", filename, err)
+	}
+
+	// Load input information from environment
+	// go generate passes a number of envs we will pick up this way
+	input := &TemplateInput{}
+	input.Package = os.Getenv("GOPACKAGE")
+
+	if input.Package == "" {
+		log.Fatal("error did not find GOPACKAGE env")
+	}
+
+	// Create the template
+	tmpl := template.Must(template.New(filename).Parse(mainGo))
+
+	// Create the main.go file
+	f, err := os.Create(filename)
 	if err != nil {
-		logrus.Fatalf("unable to write %s: %s", filename, err)
+		log.Fatalf("error creating file: %q: %+v", filename, err)
+	}
+	defer func() { _ = f.Close() }()
+	if err := tmpl.Execute(f, input); err != nil {
+		fmt.Fprintf(os.Stderr, "error processing template: %+v", err)
 	}
 }
