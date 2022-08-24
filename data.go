@@ -17,6 +17,7 @@
 package wrappergen
 
 import (
+	"fmt"
 	"go/ast"
 	"go/parser"
 	"go/token"
@@ -62,9 +63,9 @@ func NewData(binAPIPackage, packageName, outputDir string) (*Data, error) {
 	}
 
 	// Get directory containing the binAPI package
-	pathBytes, err := exec.Command("go", "list", "-f", "{{ .Dir }}", binAPIPackage).Output()
+	pathBytes, err := exec.Command("go", "list", "-f", "{{ .Dir }}", binAPIPackage).CombinedOutput()
 	if err != nil {
-		return nil, err
+		return nil, fmt.Errorf("failed to run \"go list -f {{.Dir}} %s\" %w\n %s", binAPIPackage, err, string(pathBytes))
 	}
 	rv.binAPIPath = string(pathBytes)
 	rv.binAPIPath = strings.TrimSpace(rv.binAPIPath)

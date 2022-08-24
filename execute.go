@@ -103,5 +103,8 @@ func (t *Template) createExecuteWalkFn(outputDir string, data interface{}) func(
 }
 
 func (t *Template) ExecuteAll(outputDir string, data interface{}) error {
-	return fmt.Errorf("error executing template: %w,", fs.WalkDir(t.input, ".", t.createExecuteWalkFn(outputDir, data)))
+	if err := fs.WalkDir(t.input, ".", t.createExecuteWalkFn(outputDir, data)); err != nil {
+		return fmt.Errorf("error executing template: %w", err)
+	}
+	return nil
 }
