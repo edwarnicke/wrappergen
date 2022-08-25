@@ -25,7 +25,7 @@ func main() {
 
 	data, err := wrappergen.NewData(*binapiPkg, packageName, *outputDir)
 	if err != nil {
-		logrus.Fatalf("error creating wrappergen.Data for binapiPkg: %s packageName %s", *binapiPkg, packageName)
+		logrus.Fatalf("error creating wrappergen.Data for binapiPkg: %s packageName %s err: %+v", *binapiPkg, packageName, err)
 	}
 
 	// Trim off the "templates" prefix from the paths of our templates
