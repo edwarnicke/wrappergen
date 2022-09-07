@@ -178,7 +178,7 @@ func extractConstantValue(file *ast.File, name string) string {
 func resolveImportPath(dir string) (string, error) {
 	absPath, err := filepath.Abs(dir)
 	if err != nil {
-		return "", err
+		return "", fmt.Errorf("resolveImportPath: %w", err)
 	}
 	modRoot := findGoModuleRoot(absPath)
 	if modRoot == "" {
@@ -217,11 +217,11 @@ var modulePathRE = regexp.MustCompile(`module[ \t]+([^ \t\r\n]+)`)
 func readModulePath(gomod string) (string, error) {
 	data, err := ioutil.ReadFile(gomod)
 	if err != nil {
-		return "", err
+		return "", fmt.Errorf("readModulePath: err in ioutils.ReadFile: %w", err)
 	}
 	m := modulePathRE.FindSubmatch(data)
 	if m == nil {
-		return "", err
+		return "", fmt.Errorf("readModulePath: err in modulePathRE.FindSubmatch %w", err)
 	}
 	return string(m[1]), nil
 }
